@@ -1,0 +1,67 @@
+[
+    [
+        {
+            "sensor": {
+                "id": 1,
+                "name": "HC-SR04",
+                "interval": 30
+            },
+            "columns": [
+                {
+                    "column": "DIST"
+                }
+            ],
+            "connections": [
+                {
+                    "sensor_pin_type": "TRIG",
+                    "board_pin_type": "GPIO",
+                    "board_pin_number": 8
+                },
+                {
+                    "sensor_pin_type": "ECHO",
+                    "board_pin_type": "GPIO",
+                    "board_pin_number": 9
+                }
+            ]
+        },
+        {
+            "sensor": {
+                "id": 2,
+                "name": "DHT11",
+                "interval": 40
+            },
+            "columns": [
+                {
+                    "column": "TEMP"
+                },
+                {
+                    "column": "HUM"
+                }
+            ],
+            "connections": [
+                {
+                    "sensor_pin_type": "D",
+                    "board_pin_type": "GPIO",
+                    "board_pin_number": 4
+                }
+            ]
+        }
+    ],
+    [
+        {
+            "actuator": {
+                "id": 1,
+                "name": "BULB",
+                "operating_value": 0,
+                "is_switched_on": 0
+            },
+            "connections": [
+                {
+                    "actuator_pin_type": "D",
+                    "board_pin_type": "GPIO",
+                    "board_pin_number": 2
+                }
+            ]
+        }
+    ]
+]
