@@ -1,0 +1,35 @@
+#######################################
+# Syntax Coloring Map For KonektedLib
+#######################################
+
+#######################################
+# Datatypes (KEYWORD1)
+#######################################
+
+Konekted	KEYWORD1
+
+#######################################
+# Methods and Functions (KEYWORD2)
+#######################################
+
+begin_serial KEYWORD2
+begin KEYWORD2
+connected KEYWORD2
+establish_hardware_connections KEYWORD2
+set_board_status KEYWORD2
+automate_actuators KEYWORD2
+run KEYWORD2
+
+#######################################
+# Instances (KEYWORD2)
+#######################################
+
+sensors KEYWORD2
+actuators KEYWORD2
+
+#######################################
+# Constants (LITERAL1)
+#######################################
+
+
+TIMER_MAX_TASKS	LITERAL1
