@@ -43,7 +43,7 @@ void Konekted::run() {
   automate_actuators();
 
   // Read and send sensor data to API
-
+  automate_sensors();
   
 }
 
@@ -219,6 +219,149 @@ void Konekted::automate_actuators()
 }
 
 /**
+ * @brief Automate actuators every 10 seconds
+ *
+ * @param device
+ */
+void Konekted::automate_sensors()
+{
+  while(millis() >= sensor_time_now + sensor_period) {
+    // Non-blocking delay
+    sensor_time_now += sensor_period;
+
+    // Actual automation
+    String url = String(_konekted_api) + "get-sensors-omc/?token=" + String(_konekted_token);
+    JSONVar response = JSON.parse(_get_data(url));
+
+    // Saving connections to local variables
+    sensors = JSON.stringify(response["data"]["sensors"]);
+    int len = JSON.parse(sensors).length();
+
+    if (_debug)
+    {
+      Serial.print("Preparing to send data of ");
+      Serial.print(len);
+      Serial.println(" sensors");
+    }
+
+    if (JSON.typeof(JSON.parse(sensors)) != "undefined")
+    {
+      for (int i = 0; i < len; i++)
+      {
+        String actuator = JSON.stringify(JSON.parse(sensors)[i]); 
+        _send_sensor_data(actuator);
+      }
+    }   
+  }
+}
+
+/**
+ * @brief Switch actuator on/off
+ *
+ * @param device
+ */
+void Konekted::_send_sensor_data(String _device)
+{
+  JSONVar device = JSON.parse(_device);
+  if (JSON.typeof(device) != "undefined") {
+    // fetch actuator connections as array
+    String connections_str = JSON.stringify(device["connections"]);
+    JSONVar connections = JSON.parse(connections_str);
+    
+    // fetch sensor columns as array
+    String columns_str = JSON.stringify(device["columns"]);
+    JSONVar columns = JSON.parse(columns_str);
+
+    int user_sensor_id = device["sensor"]["id"];
+
+    for (int i = 0; i < columns.length(); i++)
+    {
+      String column = JSON.stringify(columns[i]["column"]);
+      column.replace("\"", "");
+      long data = _get_data_from_sensor(column, connections_str);
+      String url = String(_konekted_api) + "set-sensor-data-omc/?token=" + String(_konekted_token) + "&user_sensor_id=" + String(user_sensor_id) + "&column=" + column + "&value=" + String(data);
+      JSONVar response = JSON.parse(_get_data(url));
+
+      if (_debug) {
+        Serial.print("Data from sensor: ");
+        Serial.println(data);
+        Serial.print("Column: ");
+        Serial.println(column);
+
+        Serial.print("Sending data to ");
+        Serial.print(url);
+        if ((bool)data["success"])
+          Serial.println("OK");
+        else
+          Serial.println("Failed");
+      }
+    }
+  }
+}
+
+long Konekted::_get_data_from_sensor(String _column, String _connections) {
+  JSONVar connections = JSON.parse(_connections);
+  // Light with LRD
+  if (_column == "LIGHT") {
+    for (int i = 0; i < connections.length(); i++) {
+      String _sensor_pin_type = JSON.stringify(connections[i]["sensor_pin_type"]);
+      _sensor_pin_type.replace("\"", "");
+      if (_sensor_pin_type == "A")
+        return analogRead(_get_analog_pin((int) connections[i]["board_pin_number"]));
+      else
+        return digitalRead((long) connections[i]["board_pin_number"]);
+    }
+  }
+
+  // Distance with ultrasonic sensor
+  if (_column == "DIST") {
+    uint8_t trig_pin = 100; 
+    uint8_t echo_pin = 100;
+    for (int i = 0; i < connections.length(); i++) {
+      String _sensor_pin_type = JSON.stringify(connections[i]["sensor_pin_type"]);
+      _sensor_pin_type.replace("\"", "");
+      if (_sensor_pin_type == "TRIG")
+        trig_pin = (int) connections[i]["board_pin_number"];
+      if (_sensor_pin_type == "ECHO")
+        echo_pin = (int) connections[i]["board_pin_number"];
+    }
+
+    if (_debug) {
+      Serial.print("Echo: ");
+      Serial.println(echo_pin);
+      Serial.print("Trig: ");
+      Serial.println(trig_pin);
+    }
+
+    if (trig_pin != 100 && echo_pin != 100) {
+      // Ensure pinModes are set correctly
+      pinMode(trig_pin, OUTPUT);
+      pinMode(echo_pin, INPUT);
+      // Clears the trigPin condition
+      digitalWrite(trig_pin, LOW);
+      delayMicroseconds(2);
+      // Sets the trigPin HIGH (ACTIVE) for 10 microseconds
+      digitalWrite(trig_pin, HIGH);
+      delayMicroseconds(10);
+      digitalWrite(trig_pin, LOW);
+      // Reads the echoPin, returns the sound wave travel time in microseconds
+      _duration = pulseIn(echo_pin, HIGH);
+      // Calculating the distance i.e. speed of sound wave divided by 2 (go and back)
+      _distance = _duration * 0.034 / 2;
+      
+      if (_debug) {
+        Serial.print("Distance: ");
+        Serial.println(_distance);
+      }
+
+      return _distance;
+    }
+  }
+
+  return 0;
+}
+
+/**
  * @brief Switch actuator on/off
  *
  * @param device
@@ -305,15 +448,15 @@ void Konekted::_connect_sensor(String _device)
     // Check if sensor pin is output or input and assign it with pinMode
     if (_in_sensor_output_array(JSON.stringify(connections[i]["sensor_pin_type"])))
     {
+      pinMode(_pin, OUTPUT);
       if (_debug)
         Serial.println(" as output.");
-      pinMode(_pin, OUTPUT);
     }
     else
     {
+      pinMode(_pin, INPUT);
       if (_debug)
         Serial.println(" as input.");
-      pinMode(_pin, INPUT);
     }
   }
 

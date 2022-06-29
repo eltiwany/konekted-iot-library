@@ -3,7 +3,7 @@ Konekted konekted(true);
 
 // Setup konekted services
 char* konekted_api = "http://konekted-api.nafuutronics.com/api/";
-char* konekted_token = "fHgsTBKFY3T1GOwj";
+char* konekted_token = "4pDm8dZoUWZ3IDb9";
 
 // Setup WiFi credentials
 char* wifi_name = "samsung-a30s"; 

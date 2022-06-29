@@ -20,6 +20,9 @@ public:
   // --- for non bloking delay
   int actuator_period = 3500;
   unsigned long actuator_time_now = 0;
+  
+  int sensor_period = 4000;
+  unsigned long sensor_time_now = 0;
 
   // Contructor
   Konekted(bool debug = false);
@@ -44,13 +47,19 @@ private:
   char *_wifi_password;
   WiFiClient _wifi_client;
 
+  // Sensor variables
+  long _duration;
+  int _distance;
+
   // Methods
   String _get_data(String url);
   String _post_data(String url, String payload);
   String _send_error(String message);
   uint8_t _get_analog_pin(int number);
+  long _get_data_from_sensor(String _column, String _connections);
   void _connect_actuator(String _device);
   void _switch_actuator(String _device);
+  void _send_sensor_data(String _device);
   void _connect_sensor(String device_connections);
   bool _in_sensor_output_array(String searchedValue);
 };
