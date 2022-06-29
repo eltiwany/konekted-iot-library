@@ -1,5 +1,5 @@
 #include "konekted.h"
-Konekted konekted(true);
+Konekted konekted;
 
 // Setup konekted services
 char* konekted_api = "http://konekted-api.nafuutronics.com/api/";

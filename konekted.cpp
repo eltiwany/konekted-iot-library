@@ -564,16 +564,16 @@ String Konekted::_get_data(String url)
  * This method actually uses GET request not POST
  *
  * @param url
- * @param payload
+ * @param data
  * @return String
  */
-String Konekted::_post_data(String url, String payload)
+String Konekted::_post_data(String url, String data)
 {
-  if (WiFi.status() == WL_CONNECTED)
-  {
+  if (WiFi.status() == WL_CONNECTED) {
+  
     // Initialize HTTP Request
     HTTPClient http;
-    String urlToProcess = (url + String("/?") + payload);
+    String urlToProcess = (url + String("/?") + data);
     urlToProcess.replace("\"", "");
     http.begin(_wifi_client, urlToProcess.c_str());
 
@@ -586,7 +586,7 @@ String Konekted::_post_data(String url, String payload)
     if (_debug)
     {
       Serial.println(urlToProcess);
-      Serial.println(payload);
+      Serial.println(data);
       Serial.print("HTTP RESPONSE CODE: ");
       Serial.println(httpResponseCode);
       Serial.println();

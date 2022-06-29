@@ -18,7 +18,7 @@ public:
   String sensors;
   String actuators;
   // --- for non bloking delay
-  int actuator_period = 3500;
+  int actuator_period = 2000;
   unsigned long actuator_time_now = 0;
   
   int sensor_period = 4000;
